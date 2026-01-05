@@ -1,14 +1,10 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "module": "es2020",
-    "baseUrl": ".",
-    "types": ["jest"],
+    "forceConsistentCasingInFileNames": true,
     "paths": {
-      "*": ["src/*"],
-      "tests/*": ["tests/*"],
-      "@components/*": ["src/components/*"],
-    },
+      "@/*": ["./src/*"],
+    }
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules", "**/Pods"]

@@ -1,13 +1,17 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context';
+import FamilyTreeScreen from './src/example/FamilyTreeScreen';
 
 const App = () => {
+  console.log('1235');
   return (
-    <View>
-      <Text>App</Text>
-    </View>
-  )
-}
+    <SafeAreaView
+      style={{
+        flex: 1,
+      }}
+    >
+      <FamilyTreeScreen />
+    </SafeAreaView>
+  );
+};
 
-export default App
-
-const styles = StyleSheet.create({})
+export default App;
