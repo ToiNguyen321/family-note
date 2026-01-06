@@ -2526,6 +2526,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/bottom-tabs@npm:^7.9.0":
+  version: 7.9.0
+  resolution: "@react-navigation/bottom-tabs@npm:7.9.0"
+  dependencies:
+    "@react-navigation/elements": "npm:^2.9.3"
+    color: "npm:^4.2.3"
+    sf-symbols-typescript: "npm:^2.1.0"
+  peerDependencies:
+    "@react-navigation/native": ^7.1.26
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+    react-native-screens: ">= 4.0.0"
+  checksum: 10/117d039151372517afc8ab29e4490fc6ac8de733f23fb16062469b13758a83bc3422a4c0bb424e24969c8f30063dbabceba07e2fe34df0f75a69e21fd0e5fc9a
+  languageName: node
+  linkType: hard
+
 "@react-navigation/core@npm:^7.13.7":
   version: 7.13.7
   resolution: "@react-navigation/core@npm:7.13.7"
@@ -2961,6 +2978,7 @@ __metadata:
     "@react-native/metro-config": "npm:0.83.1"
     "@react-native/new-app-screen": "npm:0.83.1"
     "@react-native/typescript-config": "npm:^0.83.1"
+    "@react-navigation/bottom-tabs": "npm:^7.9.0"
     "@react-navigation/native": "npm:^7.1.26"
     "@react-navigation/native-stack": "npm:^7.9.0"
     "@types/jest": "npm:^30.0.0"

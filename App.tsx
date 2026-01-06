@@ -1,17 +1,8 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
-import FamilyTreeScreen from './src/example/FamilyTreeScreen';
+import React from 'react';
+import { AppNavigator } from '@/presentation/navigation';
 
 const App = () => {
-  console.log('1235');
-  return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-      }}
-    >
-      <FamilyTreeScreen />
-    </SafeAreaView>
-  );
+  return <AppNavigator />;
 };
 
 export default App;

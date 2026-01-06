@@ -2,8 +2,16 @@
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@/types": ["./src/types"],
+      "@/services": ["./src/services"],
+      "@/hooks": ["./src/hooks"],
+      "@/presentation/*": ["./src/presentation/*"],
+      "@/components": ["./src/presentation/components"],
+      "@/screens": ["./src/presentation/screens"],
+      "@/navigation": ["./src/presentation/navigation"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
