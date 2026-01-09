@@ -2,13 +2,8 @@
  * Hook quản lý cây gia phả
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import {
-  Person,
-  FamilyTree,
-  FamilyTreeNode,
-  EditProposal,
-} from '../types';
+import { useFamilySelectors } from '@/store/familyStore';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   buildFamilyTree,
   calculateLayout,
@@ -17,11 +12,24 @@ import {
   getParents,
   getSpouse,
 } from '../services/familyTreeService';
+import { EditProposal, Person } from '../types';
 
 export const useFamilyTree = (initialMembers: Person[] = []) => {
-  const [members, setMembers] = useState<Person[]>(initialMembers);
+  const {
+    members,
+    setMembers,
+    addMember: addMemberAction,
+    updateMember: updateMemberAction,
+    deleteMember: deleteMemberAction,
+  } = useFamilySelectors();
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [proposals, setProposals] = useState<EditProposal[]>([]);
+
+  useEffect(() => {
+    if (members.length === 0 && initialMembers.length > 0) {
+      setMembers(initialMembers);
+    }
+  }, [members.length, initialMembers, setMembers]);
 
   // Xây dựng cây gia phả
   const tree = useMemo(() => {
@@ -56,19 +64,20 @@ export const useFamilyTree = (initialMembers: Person[] = []) => {
 
   // Thêm thành viên mới
   const addMember = useCallback((person: Person) => {
-    setMembers((prev) => [...prev, person]);
+    addMemberAction(person);
   }, []);
 
   // Cập nhật thành viên
-  const updateMember = useCallback((personId: string, updates: Partial<Person>) => {
-    setMembers((prev) =>
-      prev.map((p) => (p.id === personId ? { ...p, ...updates } : p))
-    );
-  }, []);
+  const updateMember = useCallback(
+    (personId: string, updates: Partial<Person>) => {
+      updateMemberAction(personId, updates);
+    },
+    [],
+  );
 
   // Xóa thành viên
   const deleteMember = useCallback((personId: string) => {
-    setMembers((prev) => prev.filter((p) => p.id !== personId));
+    deleteMemberAction(personId);
   }, []);
 
   // Chọn thành viên
@@ -87,23 +96,23 @@ export const useFamilyTree = (initialMembers: Person[] = []) => {
         status: 'pending',
         createdAt: new Date().toISOString(),
       };
-      setProposals((prev) => [...prev, proposal]);
+      setProposals(prev => [...prev, proposal]);
     },
-    []
+    [],
   );
 
   // Duyệt đề xuất
   const approveProposal = useCallback(
     (proposalId: string, reviewedBy: string) => {
-      const proposal = proposals.find((p) => p.id === proposalId);
+      const proposal = proposals.find(p => p.id === proposalId);
       if (!proposal) return;
 
       // Cập nhật thành viên
       updateMember(proposal.personId, proposal.changes);
 
       // Cập nhật trạng thái đề xuất
-      setProposals((prev) =>
-        prev.map((p) =>
+      setProposals(prev =>
+        prev.map(p =>
           p.id === proposalId
             ? {
                 ...p,
@@ -111,18 +120,18 @@ export const useFamilyTree = (initialMembers: Person[] = []) => {
                 reviewedAt: new Date().toISOString(),
                 reviewedBy,
               }
-            : p
-        )
+            : p,
+        ),
       );
     },
-    [proposals, updateMember]
+    [proposals, updateMember],
   );
 
   // Từ chối đề xuất
   const rejectProposal = useCallback(
     (proposalId: string, reviewedBy: string) => {
-      setProposals((prev) =>
-        prev.map((p) =>
+      setProposals(prev =>
+        prev.map(p =>
           p.id === proposalId
             ? {
                 ...p,
@@ -130,11 +139,11 @@ export const useFamilyTree = (initialMembers: Person[] = []) => {
                 reviewedAt: new Date().toISOString(),
                 reviewedBy,
               }
-            : p
-        )
+            : p,
+        ),
       );
     },
-    []
+    [],
   );
 
   return {

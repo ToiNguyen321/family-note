@@ -2,23 +2,23 @@
  * Service xử lý cây gia phả
  */
 
-import { Person, FamilyTreeNode, Relationship } from '../types';
+import { FamilyTreeNode, Person } from '../types';
 
 /**
  * Tìm thành viên theo ID
  */
 export const findPersonById = (
   members: Person[],
-  id: string
+  id: string,
 ): Person | undefined => {
-  return members.find((m) => m.id === id);
+  return members.find(m => m.id === id);
 };
 
 /**
  * Lấy con cái của một thành viên
  */
 export const getChildren = (members: Person[], parentId: string): Person[] => {
-  return members.filter((m) => m.parentIds.includes(parentId));
+  return members.filter(m => m.parentIds.includes(parentId));
 };
 
 /**
@@ -28,13 +28,16 @@ export const getParents = (members: Person[], personId: string): Person[] => {
   const person = findPersonById(members, personId);
   if (!person) return [];
 
-  return members.filter((m) => person.parentIds.includes(m.id));
+  return members.filter(m => person.parentIds.includes(m.id));
 };
 
 /**
  * Lấy vợ/chồng
  */
-export const getSpouse = (members: Person[], personId: string): Person | undefined => {
+export const getSpouse = (
+  members: Person[],
+  personId: string,
+): Person | undefined => {
   const person = findPersonById(members, personId);
   if (!person || !person.spouseId) return undefined;
 
@@ -45,7 +48,7 @@ export const getSpouse = (members: Person[], personId: string): Person | undefin
  * Tìm thành viên gốc (không có cha mẹ)
  */
 export const findRootPerson = (members: Person[]): Person | undefined => {
-  return members.find((m) => m.parentIds.length === 0);
+  return members.find(m => m.parentIds.length === 0);
 };
 
 /**
@@ -53,7 +56,7 @@ export const findRootPerson = (members: Person[]): Person | undefined => {
  */
 export const buildFamilyTree = (
   members: Person[],
-  rootId?: string
+  rootId?: string,
 ): FamilyTreeNode | null => {
   if (members.length === 0) return null;
 
@@ -63,12 +66,9 @@ export const buildFamilyTree = (
   const rootPerson = findPersonById(members, rootPersonId);
   if (!rootPerson) return null;
 
-  const buildNode = (
-    person: Person,
-    level: number = 0
-  ): FamilyTreeNode => {
+  const buildNode = (person: Person, level: number = 0): FamilyTreeNode => {
     const children = getChildren(members, person.id);
-    const childNodes = children.map((child) => buildNode(child, level + 1));
+    const childNodes = children.map(child => buildNode(child, level + 1));
 
     return {
       person,
@@ -84,42 +84,58 @@ export const buildFamilyTree = (
   return buildNode(rootPerson);
 };
 
+const NODE_WIDTH = 80;
+const NODE_HEIGHT = 100;
+const SIBLING_GAP = 12;
+const LEVEL_GAP = 45;
+
 /**
- * Tính toán layout cho cây gia phả (thuật toán đơn giản)
+ * Tính toán layout cho cây gia phả (thuật toán Reingold-Tilford cải tiến)
  */
 export const calculateLayout = (
   node: FamilyTreeNode,
-  startX: number = 0,
-  startY: number = 0,
-  spacingX: number = 200,
-  spacingY: number = 200
+  depth: number = 0,
+  cursor: { x: number } = { x: 0 },
 ): FamilyTreeNode => {
-  if (node.children.length === 0) {
-    return {
-      ...node,
-      x: startX,
-      y: startY,
-    };
+  // Reset cursor nếu là root (depth = 0 và x = 0 - giả định gọi lần đầu)
+  // Tuy nhiên vì hàm đệ quy dùng chung cursor reference, ta không reset ở đây.
+  // Người gọi hàm sẽ khởi tạo cursor.
+
+  const children = node.children || [];
+
+  // Duyệt đệ quy để tính vị trí các con trước (Bottom-Up / Post-order)
+  const updatedChildren = children.map(child =>
+    calculateLayout(child, depth + 1, cursor),
+  );
+
+  let x: number;
+
+  if (updatedChildren.length === 0) {
+    // Nếu là lá, đặt tại vị trí cursor hiện tại
+    x = cursor.x;
+    // Cập nhật cursor cho node lá tiếp theo
+    cursor.x += NODE_WIDTH + SIBLING_GAP;
+  } else {
+    // Nếu có con, đặt cha ở giữa các con
+    const firstChild = updatedChildren[0];
+    const lastChild = updatedChildren[updatedChildren.length - 1];
+    x = (firstChild.x + lastChild.x) / 2;
+
+    // Edge case: Nếu node cha bị lệch quá xa sang trái so với cursor (do con cái lệch trái),
+    // ta có thể cần đẩy cả cụm con sang phải?
+    // Với thuật toán này, con cái luôn được đặt bắt đầu từ cursor, nên không bao giờ lấn sang trái của node trước đó.
+    // Tuy nhiên, ta cần đảm bảo node cha không lấn sang node bên trái (nếu node bên trái là lá).
+    // Với logic hiện tại: updatedChildren[0].x >= cursor_khi_bat_dau.
+    // Và cursor luôn tăng.
+    // Nên x luôn an toàn.
   }
-
-  // Tính toán vị trí cho các con
-  const childWidth = spacingX * Math.max(1, node.children.length);
-  const childStartX = startX - childWidth / 2 + spacingX / 2;
-
-  const updatedChildren = node.children.map((child, index) => {
-    const childX = childStartX + index * spacingX;
-    return calculateLayout(child, childX, startY + spacingY, spacingX, spacingY);
-  });
-
-  // Vị trí của node hiện tại ở giữa các con
-  const avgChildX =
-    updatedChildren.reduce((sum, child) => sum + child.x, 0) /
-    updatedChildren.length;
 
   return {
     ...node,
-    x: avgChildX,
-    y: startY,
+    x,
+    y: depth * (NODE_HEIGHT + LEVEL_GAP),
+    width: NODE_WIDTH,
+    height: NODE_HEIGHT,
     children: updatedChildren,
   };
 };
@@ -129,7 +145,7 @@ export const calculateLayout = (
  */
 export const getBranchMembers = (
   members: Person[],
-  branchRootId: string
+  branchRootId: string,
 ): Person[] => {
   const branchMembers: Person[] = [];
   const visited = new Set<string>();
@@ -142,7 +158,7 @@ export const getBranchMembers = (
     if (person) {
       branchMembers.push(person);
       const children = getChildren(members, personId);
-      children.forEach((child) => collectMembers(child.id));
+      children.forEach(child => collectMembers(child.id));
     }
   };
 

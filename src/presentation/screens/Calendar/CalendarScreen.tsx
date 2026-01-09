@@ -2,26 +2,22 @@
  * Màn hình lịch cúng giỗ và sinh nhật
  */
 
+import { useCalendar } from '@/hooks/useCalendar';
+import { CalendarItem } from '@/presentation/components/CalendarItem';
+import { EventType } from '@/types';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { useFamilyTree } from '@/hooks/useFamilyTree';
-import { useCalendar } from '@/hooks/useCalendar';
-import { EventType } from '@/types';
-import { CalendarItem } from '@/presentation/components/CalendarItem';
-import { mockFamilyMembers } from '@/data/mockFamily';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Mock data
 export const CalendarScreen: React.FC = () => {
-  const { members } = useFamilyTree(mockFamilyMembers);
-  const { allEvents, upcomingEvents, eventsInMonth, filterType, changeFilter } =
-    useCalendar(members);
+  const { allEvents, upcomingEvents, changeFilter } = useCalendar();
 
   const [selectedFilter, setSelectedFilter] = useState<EventType | 'all'>(
     'all',

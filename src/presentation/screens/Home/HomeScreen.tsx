@@ -2,29 +2,26 @@
  * Màn hình chính - Trang chủ
  */
 
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useFamilyTree } from '@/hooks/useFamilyTree';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useNotifications } from '@/hooks/useNotifications';
-import { NotificationCard } from '@/presentation/components/NotificationCard';
 import { CalendarItem } from '@/presentation/components/CalendarItem';
-import { mockFamilyMembers } from '@/data/mockFamily';
+import { NotificationCard } from '@/presentation/components/NotificationCard';
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
 
   // Mock data - sẽ được thay thế bằng data thực tế
-  const { members } = useFamilyTree(mockFamilyMembers);
-  const { upcomingEvents: calendarEvents } = useCalendar(members);
+  const { upcomingEvents: calendarEvents } = useCalendar();
   const { notifications, unreadCount } = useNotifications(calendarEvents);
 
   const upcomingEventsList = calendarEvents.slice(0, 5);

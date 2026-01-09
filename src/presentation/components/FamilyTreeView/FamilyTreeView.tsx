@@ -3,10 +3,12 @@
  * Dùng ScrollView kép (ngang + dọc) để pan; có thể mở rộng thêm zoom nếu cần.
  */
 
-import React from 'react';
-import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
-import { FamilyTreeNode, Person } from '@/types';
 import { PersonNode } from '@/presentation/components/PersonNode';
+import { FamilyTreeNode, Person } from '@/types';
+import { ReactNativeZoomableView } from '@dudigital/react-native-zoomable-view';
+import React from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 interface FamilyTreeViewProps {
   tree: FamilyTreeNode | null;
@@ -128,64 +130,73 @@ export const FamilyTreeView: React.FC<FamilyTreeViewProps> = ({
     <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View
+          <ReactNativeZoomableView
+            zoomEnabled
+            maxZoom={2.0}
+            minZoom={0.3}
+            zoomStep={0.5}
+            initialZoom={1}
+            bindToBorders={false}
             style={[
-              styles.canvas,
+              styles.zoomableView,
               { width: canvasWidth, height: canvasHeight },
             ]}
           >
-            {/* Đường nối cha - con (dùng View để đảm bảo hiển thị) */}
-            {links.map(link => {
-              const fromX = padding + link.from.x + link.from.width / 2;
-              const fromY = padding + link.from.y + link.from.height;
-              const toX = padding + link.to.x + link.to.width / 2;
-              const toY = padding + link.to.y;
+            <View
+              style={[
+                styles.canvas,
+                { width: canvasWidth, height: canvasHeight },
+              ]}
+            >
+              <Svg
+                width={canvasWidth}
+                height={canvasHeight}
+                style={StyleSheet.absoluteFill}
+              >
+                {links.map((link, index) => {
+                  const fromX = padding + link.from.x + link.from.width / 2;
+                  const fromY = padding + link.from.y + link.from.height;
+                  const toX = padding + link.to.x + link.to.width / 2;
+                  const toY = padding + link.to.y;
 
-              const left = Math.min(fromX, toX);
-              const top = Math.min(fromY, toY);
-              const width = Math.max(2, Math.abs(toX - fromX));
-              const height = Math.max(2, Math.abs(toY - fromY));
+                  const midY = (fromY + toY) / 2;
+                  const d = `M ${fromX} ${fromY} V ${midY} H ${toX} V ${toY}`;
 
-              return (
-                <View
-                  key={`${link.from.person.id}-${link.to.person.id}`}
-                  style={[
-                    styles.link,
-                    {
-                      left,
-                      top,
-                      width,
-                      height,
-                      borderTopWidth: 2,
-                      borderLeftWidth: 2,
-                    },
-                  ]}
-                />
-              );
-            })}
+                  return (
+                    <Path
+                      key={`link-${index}`}
+                      d={d}
+                      stroke="#999"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  );
+                })}
+              </Svg>
 
-            {nodes.map(node => {
-              const relationLabel = getRelationLabel(
-                currentPersonId,
-                node.person.id,
-                nodes,
-                members,
-              );
-              return (
-                <PersonNode
-                  key={node.person.id}
-                  person={node.person}
-                  x={padding + node.x}
-                  y={padding + node.y}
-                  width={node.width}
-                  height={node.height}
-                  onPress={onPersonPress}
-                  scale={1}
-                  relationLabel={relationLabel}
-                />
-              );
-            })}
-          </View>
+              {nodes.map(node => {
+                const relationLabel = getRelationLabel(
+                  currentPersonId,
+                  node.person.id,
+                  nodes,
+                  members,
+                );
+                return (
+                  <PersonNode
+                    key={node.person.id}
+                    person={node.person}
+                    x={padding + node.x}
+                    y={padding + node.y}
+                    width={node.width}
+                    height={node.height}
+                    onPress={onPersonPress}
+                    scale={1}
+                    relationLabel={relationLabel}
+                  />
+                );
+              })}
+            </View>
+          </ReactNativeZoomableView>
         </ScrollView>
       </ScrollView>
     </View>
@@ -197,6 +208,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  zoomableView: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+  },
   canvas: {
     position: 'relative',
   },
@@ -204,10 +220,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  link: {
-    position: 'absolute',
-    borderColor: '#9aa5b1',
-    zIndex: 0,
   },
 });

@@ -2,7 +2,7 @@
  * Service xử lý phân quyền
  */
 
-import { Permission, FamilyRole, Person } from '../types';
+import { FamilyRole, Permission } from '../types';
 
 /**
  * Kiểm tra quyền xem
@@ -47,7 +47,7 @@ export const isAdmin = (permission: Permission): boolean => {
  */
 export const createDefaultPermission = (
   userId: string,
-  role: FamilyRole
+  role: FamilyRole,
 ): Permission => {
   switch (role) {
     case FamilyRole.PATRIARCH:
@@ -93,10 +93,7 @@ export const createDefaultPermission = (
 /**
  * Kiểm tra có thể chỉnh sửa thành viên cụ thể không
  */
-export const canEditPerson = (
-  permission: Permission,
-  person: Person
-): boolean => {
+export const canEditPerson = (permission: Permission): boolean => {
   if (!canEdit(permission)) return false;
 
   // Quản trị viên có thể chỉnh sửa tất cả

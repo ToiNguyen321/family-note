@@ -2,7 +2,12 @@
  * Service xử lý thông báo
  */
 
-import { Notification, NotificationType, CalendarEvent, Person } from '../types';
+import {
+  CalendarEvent,
+  Notification,
+  NotificationType,
+  Person,
+} from '../types';
 import { shouldRemind } from './calendarService';
 
 /**
@@ -10,7 +15,7 @@ import { shouldRemind } from './calendarService';
  */
 export const createNotificationFromEvent = (
   event: CalendarEvent,
-  reminderDay: number
+  reminderDay: number,
 ): Notification => {
   let title = '';
   let message = '';
@@ -32,7 +37,7 @@ export const createNotificationFromEvent = (
 
   return {
     id: `notification-${event.id}-${reminderDay}`,
-    type: event.type as NotificationType,
+    type: event.type as unknown as any,
     title,
     message,
     personId: event.personId,
@@ -40,7 +45,7 @@ export const createNotificationFromEvent = (
     read: false,
     createdAt: new Date().toISOString(),
     scheduledFor: new Date(
-      new Date(event.date).getTime() - reminderDay * 24 * 60 * 60 * 1000
+      new Date(event.date).getTime() - reminderDay * 24 * 60 * 60 * 1000,
     ).toISOString(),
   };
 };
@@ -49,12 +54,12 @@ export const createNotificationFromEvent = (
  * Tạo thông báo từ danh sách sự kiện
  */
 export const createNotificationsFromEvents = (
-  events: CalendarEvent[]
+  events: CalendarEvent[],
 ): Notification[] => {
   const notifications: Notification[] = [];
 
-  events.forEach((event) => {
-    event.reminderDays.forEach((reminderDay) => {
+  events.forEach(event => {
+    event.reminderDays.forEach(reminderDay => {
       if (shouldRemind(event, reminderDay)) {
         notifications.push(createNotificationFromEvent(event, reminderDay));
       }
@@ -67,10 +72,7 @@ export const createNotificationsFromEvents = (
 /**
  * Tạo thông báo cập nhật thông tin
  */
-export const createInfoUpdateNotification = (
-  person: Person,
-  updatedBy: string
-): Notification => {
+export const createInfoUpdateNotification = (person: Person): Notification => {
   return {
     id: `info-update-${person.id}-${Date.now()}`,
     type: NotificationType.INFO_UPDATE,
@@ -86,9 +88,9 @@ export const createInfoUpdateNotification = (
  * Lọc thông báo chưa đọc
  */
 export const getUnreadNotifications = (
-  notifications: Notification[]
+  notifications: Notification[],
 ): Notification[] => {
-  return notifications.filter((n) => !n.read);
+  return notifications.filter(n => !n.read);
 };
 
 /**
@@ -96,10 +98,10 @@ export const getUnreadNotifications = (
  */
 export const markAsRead = (
   notifications: Notification[],
-  notificationId: string
+  notificationId: string,
 ): Notification[] => {
-  return notifications.map((n) =>
-    n.id === notificationId ? { ...n, read: true } : n
+  return notifications.map(n =>
+    n.id === notificationId ? { ...n, read: true } : n,
   );
 };
 
@@ -107,7 +109,7 @@ export const markAsRead = (
  * Đánh dấu tất cả thông báo đã đọc
  */
 export const markAllAsRead = (
-  notifications: Notification[]
+  notifications: Notification[],
 ): Notification[] => {
-  return notifications.map((n) => ({ ...n, read: true }));
+  return notifications.map(n => ({ ...n, read: true }));
 };

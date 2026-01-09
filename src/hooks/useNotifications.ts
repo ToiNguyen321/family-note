@@ -2,36 +2,25 @@
  * Hook quản lý thông báo
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  Notification,
-  NotificationType,
-  CalendarEvent,
-  NotificationSettings,
-} from '../types';
+import { useNotificationSelectors } from '@/store/notificationStore';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   createNotificationsFromEvents,
-  createInfoUpdateNotification,
   getUnreadNotifications,
-  markAsRead,
-  markAllAsRead,
 } from '../services/notificationService';
+import { CalendarEvent, NotificationType } from '../types';
 
-const defaultSettings: NotificationSettings = {
-  deathAnniversary: true,
-  birthday: true,
-  familyEvent: true,
-  reminderDays: [1, 3, 7],
-};
-
-export const useNotifications = (
-  events: CalendarEvent[],
-  initialNotifications: Notification[] = [],
-) => {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(initialNotifications);
-  const [settings, setSettings] =
-    useState<NotificationSettings>(defaultSettings);
+export const useNotifications = (events: CalendarEvent[]) => {
+  const {
+    notifications,
+    settings,
+    setNotifications,
+    addNotification,
+    removeNotification,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    updateSettings,
+  } = useNotificationSelectors();
 
   // Tạo thông báo từ sự kiện
   // Sử dụng useRef để tránh infinite loop khi events array thay đổi reference
@@ -39,29 +28,22 @@ export const useNotifications = (
   const processedEventIdsRef = React.useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // Chỉ xử lý nếu số lượng events thay đổi hoặc có event mới
     if (events.length !== prevEventsLengthRef.current) {
       prevEventsLengthRef.current = events.length;
-
       const newNotifications = createNotificationsFromEvents(events);
-
-      setNotifications(prev => {
-        // Tránh trùng lặp bằng cách kiểm tra ID
-        const existingIds = new Set(prev.map(n => n.id));
-        const uniqueNew = newNotifications.filter(n => {
-          if (existingIds.has(n.id) || processedEventIdsRef.current.has(n.id)) {
-            return false;
-          }
-          processedEventIdsRef.current.add(n.id);
-          return true;
-        });
-
-        // Chỉ update nếu có thông báo mới
-        if (uniqueNew.length === 0) return prev;
-        return [...prev, ...uniqueNew];
+      const existingIds = new Set(notifications.map(n => n.id));
+      const uniqueNew = newNotifications.filter(n => {
+        if (existingIds.has(n.id) || processedEventIdsRef.current.has(n.id)) {
+          return false;
+        }
+        processedEventIdsRef.current.add(n.id);
+        return true;
       });
+      if (uniqueNew.length > 0) {
+        setNotifications([...uniqueNew, ...notifications]);
+      }
     }
-  }, [events.length]); // Chỉ phụ thuộc vào length, không phải toàn bộ array
+  }, [events.length, notifications, setNotifications]);
 
   // Thông báo chưa đọc
   const unreadNotifications = useMemo(() => {
@@ -85,31 +67,36 @@ export const useNotifications = (
   }, [notifications, settings]);
 
   // Đánh dấu đã đọc
-  const markNotificationAsRead = useCallback((notificationId: string) => {
-    setNotifications(prev => markAsRead(prev, notificationId));
-  }, []);
-
-  // Đánh dấu tất cả đã đọc
-  const markAllNotificationsAsRead = useCallback(() => {
-    setNotifications(prev => markAllAsRead(prev));
-  }, []);
-
-  // Thêm thông báo mới
-  const addNotification = useCallback((notification: Notification) => {
-    setNotifications(prev => [notification, ...prev]);
-  }, []);
-
-  // Xóa thông báo
-  const removeNotification = useCallback((notificationId: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== notificationId));
-  }, []);
-
-  // Cập nhật settings
-  const updateSettings = useCallback(
-    (newSettings: Partial<NotificationSettings>) => {
-      setSettings(prev => ({ ...prev, ...newSettings }));
+  const markNotificationAsReadCb = useCallback(
+    (notificationId: string) => {
+      markNotificationAsRead(notificationId);
     },
-    [],
+    [markNotificationAsRead],
+  );
+
+  const markAllNotificationsAsReadCb = useCallback(() => {
+    markAllNotificationsAsRead();
+  }, [markAllNotificationsAsRead]);
+
+  const addNotificationCb = useCallback(
+    (notification: import('../types').Notification) => {
+      addNotification(notification);
+    },
+    [addNotification],
+  );
+
+  const removeNotificationCb = useCallback(
+    (notificationId: string) => {
+      removeNotification(notificationId);
+    },
+    [removeNotification],
+  );
+
+  const updateSettingsCb = useCallback(
+    (newSettings: Partial<typeof settings>) => {
+      updateSettings(newSettings);
+    },
+    [updateSettings],
   );
 
   // Số lượng thông báo chưa đọc
@@ -122,10 +109,10 @@ export const useNotifications = (
     unreadNotifications,
     unreadCount,
     settings,
-    markNotificationAsRead,
-    markAllNotificationsAsRead,
-    addNotification,
-    removeNotification,
-    updateSettings,
+    markNotificationAsRead: markNotificationAsReadCb,
+    markAllNotificationsAsRead: markAllNotificationsAsReadCb,
+    addNotification: addNotificationCb,
+    removeNotification: removeNotificationCb,
+    updateSettings: updateSettingsCb,
   };
 };

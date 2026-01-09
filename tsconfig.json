@@ -11,7 +11,9 @@
       "@/presentation/*": ["./src/presentation/*"],
       "@/components": ["./src/presentation/components"],
       "@/screens": ["./src/presentation/screens"],
-      "@/navigation": ["./src/presentation/navigation"]
+      "@/navigation": ["./src/presentation/navigation"],
+      "@/store": ["./src/store"],
+      "@/utils": ["./src/utils"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

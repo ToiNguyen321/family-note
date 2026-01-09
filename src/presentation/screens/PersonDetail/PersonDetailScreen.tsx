@@ -2,36 +2,34 @@
  * Màn hình chi tiết thành viên
  */
 
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { PermissionBadge } from '@/components/PermissionBadge';
 import { useFamilyTree } from '@/hooks/useFamilyTree';
 import { usePermissions } from '@/hooks/usePermissions';
 import { PersonStatus } from '@/types';
-import { mockFamilyMembers } from '@/data/mockFamily';
+import { formatDateVN, lunarSuffix } from '@/utils/date';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React from 'react';
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export const PersonDetailScreen: React.FC = () => {
   const route = useRoute();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { personId } = route.params as { personId: string };
 
   const {
-    members,
     selectedPerson,
     selectedPersonChildren,
     selectedPersonParents,
     selectedPersonSpouse,
     selectPerson,
-  } = useFamilyTree(mockFamilyMembers);
+  } = useFamilyTree();
   const { hasEditPermission, hasDeletePermission } = usePermissions(
     'user-id',
     'member' as any,
@@ -40,12 +38,6 @@ export const PersonDetailScreen: React.FC = () => {
   React.useEffect(() => {
     selectPerson(personId);
   }, [personId, selectPerson]);
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Chưa có thông tin';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
-  };
 
   const handleEdit = () => {
     if (!hasEditPermission) {
@@ -116,16 +108,16 @@ export const PersonDetailScreen: React.FC = () => {
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Ngày sinh:</Text>
           <Text style={styles.infoValue}>
-            {formatDate(selectedPerson.dateOfBirth)}
-            {selectedPerson.lunarBirthDate && ' (Âm lịch)'}
+            {formatDateVN(selectedPerson.dateOfBirth)}
+            {lunarSuffix(!!selectedPerson.lunarBirthDate)}
           </Text>
         </View>
         {selectedPerson.dateOfDeath && (
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Ngày mất:</Text>
             <Text style={styles.infoValue}>
-              {formatDate(selectedPerson.dateOfDeath)}
-              {selectedPerson.lunarDeathDate && ' (Âm lịch)'}
+              {formatDateVN(selectedPerson.dateOfDeath)}
+              {lunarSuffix(!!selectedPerson.lunarDeathDate)}
             </Text>
           </View>
         )}

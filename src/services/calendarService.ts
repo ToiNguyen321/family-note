@@ -2,7 +2,31 @@
  * Service xử lý lịch cúng giỗ và sinh nhật
  */
 
-import { Person, CalendarEvent, EventType } from '../types';
+import { CalendarEvent, EventType, Person } from '../types';
+
+const startOfDay = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+};
+
+const toISODate = (d: Date) =>
+  new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString();
+
+const nextAnnualOccurrence = (dateStr: string): string => {
+  const base = new Date(dateStr);
+  const today = startOfDay(new Date());
+  const thisYear = new Date(
+    today.getFullYear(),
+    base.getMonth(),
+    base.getDate(),
+  );
+  const target =
+    thisYear >= today
+      ? thisYear
+      : new Date(today.getFullYear() + 1, base.getMonth(), base.getDate());
+  return toISODate(target);
+};
 
 /**
  * Chuyển đổi ngày dương lịch sang âm lịch
@@ -27,7 +51,7 @@ export const convertToSolar = (lunarDate: string): string => {
  */
 export const createDeathAnniversaryEvents = (
   person: Person,
-  reminderDays: number[] = [1, 3, 7]
+  reminderDays: number[] = [1, 3, 7],
 ): CalendarEvent[] => {
   if (!person.dateOfDeath) return [];
 
@@ -35,14 +59,16 @@ export const createDeathAnniversaryEvents = (
   const deathDate = person.lunarDeathDate || person.dateOfDeath;
   const isLunar = !!person.lunarDeathDate;
 
-  // Tạo sự kiện chính (ngày cúng giỗ)
+  const solarBase = isLunar ? convertToSolar(deathDate) : deathDate;
+  const nextDate = nextAnnualOccurrence(solarBase);
+
   events.push({
     id: `death-anniversary-${person.id}`,
     personId: person.id,
     personName: person.fullName,
     type: EventType.DEATH_ANNIVERSARY,
-    date: isLunar ? convertToSolar(deathDate) : deathDate,
-    lunarDate: isLunar ? deathDate : convertToLunar(deathDate),
+    date: nextDate,
+    lunarDate: isLunar ? deathDate : convertToLunar(nextDate),
     title: `Giỗ ${person.fullName}`,
     description: `Ngày giỗ của ${person.fullName}`,
     reminderDays,
@@ -57,7 +83,7 @@ export const createDeathAnniversaryEvents = (
  */
 export const createBirthdayEvents = (
   person: Person,
-  reminderDays: number[] = [1, 3, 7]
+  reminderDays: number[] = [1, 3, 7],
 ): CalendarEvent[] => {
   if (!person.dateOfBirth || person.status === 'deceased') return [];
 
@@ -65,14 +91,16 @@ export const createBirthdayEvents = (
   const birthDate = person.lunarBirthDate || person.dateOfBirth;
   const isLunar = !!person.lunarBirthDate;
 
-  // Tạo sự kiện chính (ngày sinh nhật)
+  const solarBase = isLunar ? convertToSolar(birthDate) : birthDate;
+  const nextDate = nextAnnualOccurrence(solarBase);
+
   events.push({
     id: `birthday-${person.id}`,
     personId: person.id,
     personName: person.fullName,
     type: EventType.BIRTHDAY,
-    date: isLunar ? convertToSolar(birthDate) : birthDate,
-    lunarDate: isLunar ? birthDate : convertToLunar(birthDate),
+    date: nextDate,
+    lunarDate: isLunar ? birthDate : convertToLunar(nextDate),
     title: `Sinh nhật ${person.fullName}`,
     description: `Sinh nhật của ${person.fullName}`,
     reminderDays,
@@ -87,11 +115,11 @@ export const createBirthdayEvents = (
  */
 export const getAllEvents = (
   members: Person[],
-  reminderDays: number[] = [1, 3, 7]
+  reminderDays: number[] = [1, 3, 7],
 ): CalendarEvent[] => {
   const events: CalendarEvent[] = [];
 
-  members.forEach((member) => {
+  members.forEach(member => {
     // Thêm sự kiện cúng giỗ
     events.push(...createDeathAnniversaryEvents(member, reminderDays));
 
@@ -99,8 +127,8 @@ export const getAllEvents = (
     events.push(...createBirthdayEvents(member, reminderDays));
   });
 
-  return events.sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+  return events.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 };
 
@@ -109,14 +137,14 @@ export const getAllEvents = (
  */
 export const getUpcomingEvents = (
   events: CalendarEvent[],
-  daysAhead: number = 30
+  daysAhead: number = 30,
 ): CalendarEvent[] => {
-  const today = new Date();
-  const futureDate = new Date();
-  futureDate.setDate(today.getDate() + daysAhead);
+  const today = startOfDay(new Date());
+  const futureDate = startOfDay(new Date(today));
+  futureDate.setDate(futureDate.getDate() + daysAhead);
 
-  return events.filter((event) => {
-    const eventDate = new Date(event.date);
+  return events.filter(event => {
+    const eventDate = startOfDay(new Date(event.date));
     return eventDate >= today && eventDate <= futureDate;
   });
 };
@@ -126,12 +154,12 @@ export const getUpcomingEvents = (
  */
 export const shouldRemind = (
   event: CalendarEvent,
-  reminderDay: number
+  reminderDay: number,
 ): boolean => {
   const today = new Date();
   const eventDate = new Date(event.date);
   const diffDays = Math.floor(
-    (eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    (eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   );
 
   return diffDays === reminderDay && event.reminderDays.includes(reminderDay);

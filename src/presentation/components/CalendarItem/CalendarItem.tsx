@@ -2,8 +2,9 @@
  * Component hiển thị một sự kiện trong lịch
  */
 
+import { formatDateVNShort, lunarSuffix } from '@/utils/date';
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CalendarEvent, EventType } from '../../../types';
 
 interface CalendarItemProps {
@@ -11,7 +12,10 @@ interface CalendarItemProps {
   onPress?: (event: CalendarEvent) => void;
 }
 
-export const CalendarItem: React.FC<CalendarItemProps> = ({ event, onPress }) => {
+export const CalendarItem: React.FC<CalendarItemProps> = ({
+  event,
+  onPress,
+}) => {
   const getEventIcon = () => {
     switch (event.type) {
       case EventType.DEATH_ANNIVERSARY:
@@ -38,15 +42,6 @@ export const CalendarItem: React.FC<CalendarItemProps> = ({ event, onPress }) =>
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   return (
     <TouchableOpacity
       style={[styles.container, { borderLeftColor: getEventColor() }]}
@@ -59,8 +54,8 @@ export const CalendarItem: React.FC<CalendarItemProps> = ({ event, onPress }) =>
       <View style={styles.content}>
         <Text style={styles.title}>{event.title}</Text>
         <Text style={styles.date}>
-          {formatDate(event.date)}
-          {event.isLunar && ' (Âm lịch)'}
+          {formatDateVNShort(event.date)}
+          {lunarSuffix(event.isLunar)}
         </Text>
         {event.description && (
           <Text style={styles.description} numberOfLines={2}>

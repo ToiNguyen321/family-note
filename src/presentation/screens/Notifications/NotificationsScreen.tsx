@@ -12,15 +12,12 @@ import {
   Switch,
 } from 'react-native';
 import { NotificationCard } from '@/presentation/components/NotificationCard';
-import { useFamilyTree } from '@/hooks/useFamilyTree';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useNotifications } from '@/hooks/useNotifications';
-import { mockFamilyMembers } from '@/data/mockFamily';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const NotificationsScreen: React.FC = () => {
-  const { members } = useFamilyTree(mockFamilyMembers);
-  const { allEvents } = useCalendar(members);
+  const { allEvents } = useCalendar();
   const {
     notifications,
     unreadNotifications,

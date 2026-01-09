@@ -2,19 +2,15 @@
  * Hook quản lý lịch cúng giỗ và sinh nhật
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import { CalendarEvent, Person, EventType } from '../types';
-import {
-  getAllEvents,
-  getUpcomingEvents,
-  createDeathAnniversaryEvents,
-  createBirthdayEvents,
-} from '../services/calendarService';
+import { useCalendarSelectors } from '@/store/calendarStore';
+import { useFamilySelectors } from '@/store/familyStore';
+import { useCallback, useMemo, useState } from 'react';
+import { getAllEvents, getUpcomingEvents } from '../services/calendarService';
+import { EventType } from '../types';
 
-export const useCalendar = (
-  members: Person[],
-  reminderDays: number[] = [1, 3, 7]
-) => {
+export const useCalendar = () => {
+  const { members } = useFamilySelectors();
+  const { reminderDays } = useCalendarSelectors();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [filterType, setFilterType] = useState<EventType | 'all'>('all');
@@ -32,7 +28,7 @@ export const useCalendar = (
   // Sự kiện theo ngày được chọn
   const eventsOnSelectedDate = useMemo(() => {
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    return allEvents.filter((event) => {
+    return allEvents.filter(event => {
       const eventDateStr = event.date.split('T')[0];
       return eventDateStr === selectedDateStr;
     });
@@ -41,7 +37,7 @@ export const useCalendar = (
   // Sự kiện đã lọc theo loại
   const filteredEvents = useMemo(() => {
     if (filterType === 'all') return allEvents;
-    return allEvents.filter((event) => event.type === filterType);
+    return allEvents.filter(event => event.type === filterType);
   }, [allEvents, filterType]);
 
   // Sự kiện trong tháng được chọn
@@ -49,11 +45,9 @@ export const useCalendar = (
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth();
 
-    return allEvents.filter((event) => {
+    return allEvents.filter(event => {
       const eventDate = new Date(event.date);
-      return (
-        eventDate.getFullYear() === year && eventDate.getMonth() === month
-      );
+      return eventDate.getFullYear() === year && eventDate.getMonth() === month;
     });
   }, [allEvents, selectedDate]);
 
@@ -75,13 +69,13 @@ export const useCalendar = (
   // Lấy sự kiện cúng giỗ sắp tới
   const upcomingDeathAnniversaries = useMemo(() => {
     return upcomingEvents.filter(
-      (event) => event.type === EventType.DEATH_ANNIVERSARY
+      event => event.type === EventType.DEATH_ANNIVERSARY,
     );
   }, [upcomingEvents]);
 
   // Lấy sự kiện sinh nhật sắp tới
   const upcomingBirthdays = useMemo(() => {
-    return upcomingEvents.filter((event) => event.type === EventType.BIRTHDAY);
+    return upcomingEvents.filter(event => event.type === EventType.BIRTHDAY);
   }, [upcomingEvents]);
 
   return {

@@ -2,15 +2,17 @@
  * Navigation chính của ứng dụng
  */
 
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { mockFamilyMembers } from '@/data/mockFamily';
+import { useFamilyStore } from '@/store/familyStore';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HomeScreen } from '../screens/Home';
-import { FamilyTreeScreen } from '../screens/FamilyTree';
-import { PersonDetailScreen } from '../screens/PersonDetail';
+import React, { useEffect } from 'react';
 import { CalendarScreen } from '../screens/Calendar';
+import { FamilyTreeScreen } from '../screens/FamilyTree';
+import { HomeScreen } from '../screens/Home';
 import { NotificationsScreen } from '../screens/Notifications';
+import { PersonDetailScreen } from '../screens/PersonDetail';
 import { SettingsScreen } from '../screens/Settings';
 
 export type RootStackParamList = {
@@ -85,15 +87,12 @@ const MainTabs = () => {
   );
 };
 
-// Helper component cho tab icons
-const TabIcon: React.FC<{ icon: string; color: string }> = ({ icon }) => {
-  // Note: Trong React Native, bạn nên sử dụng icon library như react-native-vector-icons
-  // Hoặc sử dụng emoji trực tiếp trong Text component
-  return null; // Placeholder - cần thay thế bằng icon library
-};
-
 // Root Stack Navigator
 export const AppNavigator = () => {
+  const setMembers = useFamilyStore(s => s.setMembers);
+  useEffect(() => {
+    setMembers(mockFamilyMembers);
+  }, [setMembers]);
   return (
     <NavigationContainer>
       <Stack.Navigator

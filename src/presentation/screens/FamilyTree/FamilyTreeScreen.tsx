@@ -2,65 +2,18 @@
  * Màn hình hiển thị cây gia phả theo từng thế hệ (mỗi level một hàng ngang)
  */
 
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  Image,
-  ScrollView,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { useFamilyTree } from '@/hooks/useFamilyTree';
 import { usePermissions } from '@/hooks/usePermissions';
-import { FamilyTreeNode, Person, PersonStatus } from '@/types';
-import { mockFamilyMembers } from '@/data/mockFamily';
 import { FamilyTreeView } from '@/presentation/components/FamilyTreeView';
-
-// Chuyển cây FamilyTreeNode thành danh sách levels (mỗi level là một mảng node)
-const buildLevels = (root: FamilyTreeNode): FamilyTreeNode[][] => {
-  const levels: FamilyTreeNode[][] = [];
-  const queue: Array<{ node: FamilyTreeNode; level: number }> = [
-    { node: root, level: 0 },
-  ];
-
-  while (queue.length > 0) {
-    const { node, level } = queue.shift() as {
-      node: FamilyTreeNode;
-      level: number;
-    };
-
-    if (!levels[level]) {
-      levels[level] = [];
-    }
-    levels[level].push(node);
-
-    node.children.forEach(child => {
-      queue.push({ node: child, level: level + 1 });
-    });
-  }
-
-  return levels;
-};
-
-const formatYears = (person: Person) => {
-  const birthYear = person.dateOfBirth
-    ? new Date(person.dateOfBirth).getFullYear()
-    : '...';
-  const deathYear = person.dateOfDeath
-    ? new Date(person.dateOfDeath).getFullYear()
-    : person.status === PersonStatus.DECEASED
-    ? '...'
-    : 'nay';
-  return `${birthYear} - ${deathYear}`;
-};
+import { Person } from '@/types';
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const FamilyTreeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const { tree, members } = useFamilyTree(mockFamilyMembers);
+  const { tree, members } = useFamilyTree();
   const { hasEditPermission } = usePermissions('user-id', 'member' as any);
 
   const handlePersonPress = (person: Person) => {
@@ -174,78 +127,5 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: '#fff',
     fontWeight: '600',
-  },
-  treeContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  levelRow: {
-    marginBottom: 24,
-  },
-  levelLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#777',
-    marginLeft: 8,
-    marginBottom: 8,
-  },
-  levelNodes: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  card: {
-    width: 130,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-    marginHorizontal: 4,
-  },
-  cardAvatarContainer: {
-    marginBottom: 6,
-  },
-  cardAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#e0e0e0',
-  },
-  cardAvatarPlaceholder: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#4a90e2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardAvatarText: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  cardName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  cardYears: {
-    fontSize: 11,
-    color: '#555',
-    marginTop: 2,
-  },
-  cardRole: {
-    fontSize: 11,
-    color: '#888',
-    marginTop: 2,
   },
 });

@@ -1541,6 +1541,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dudigital/react-native-zoomable-view@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "@dudigital/react-native-zoomable-view@npm:1.1.4"
+  dependencies:
+    prop-types: "npm:^15.7.2"
+    react-native: "npm:>=0.54.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-native: ">=0.54.0"
+  checksum: 10/8a99af48e8b90c8a5b302cd40442fd101f728949e8ec2987bc969ca5c4d9536b1f48451dc63ab93cccb23e59d13274ed60656f3b96797f9dfdd942efbb1bff45
+  languageName: node
+  linkType: hard
+
 "@eslint-community/eslint-utils@npm:^4.2.0, @eslint-community/eslint-utils@npm:^4.7.0":
   version: 4.9.1
   resolution: "@eslint-community/eslint-utils@npm:4.9.1"
@@ -2970,6 +2983,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.25.3"
     "@babel/runtime": "npm:^7.25.0"
+    "@dudigital/react-native-zoomable-view": "npm:^1.1.4"
     "@react-native-community/cli": "npm:20.0.0"
     "@react-native-community/cli-platform-android": "npm:20.0.0"
     "@react-native-community/cli-platform-ios": "npm:20.0.0"
@@ -2986,6 +3000,7 @@ __metadata:
     "@types/react-test-renderer": "npm:^19.1.0"
     babel-plugin-module-resolver: "npm:^5.0.2"
     eslint: "npm:^8.19.0"
+    eslint-plugin-unused-imports: "npm:^4.3.0"
     jest: "npm:^29.6.3"
     metro-react-native-babel-preset: "npm:^0.77.0"
     prettier: "npm:2.8.8"
@@ -2997,6 +3012,7 @@ __metadata:
     react-native-svg-pan-zoom: "npm:^0.1.2"
     react-test-renderer: "npm:19.2.0"
     typescript: "npm:^5.9.3"
+    zustand: "npm:^5.0.9"
   languageName: unknown
   linkType: soft
 
@@ -4658,6 +4674,19 @@ __metadata:
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
   checksum: 10/ee1bd4e0ec64f29109d5a625bb703d179c82e0159c86c3f1b52fc1209d2994625a137dae303c333fb308a2e38315e44066d5204998177e31974382f9fda25d5c
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-unused-imports@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "eslint-plugin-unused-imports@npm:4.3.0"
+  peerDependencies:
+    "@typescript-eslint/eslint-plugin": ^8.0.0-0 || ^7.0.0 || ^6.0.0 || ^5.0.0
+    eslint: ^9.0.0 || ^8.0.0
+  peerDependenciesMeta:
+    "@typescript-eslint/eslint-plugin":
+      optional: true
+  checksum: 10/64ec1f686d90f18a27c27273a0338bad6964a611f497b81c5e7eace9d9a4f38d96070d7c389c2626095a9e5e7dbcafccc6444fa2933c9a7649996a7ca875738f
   languageName: node
   linkType: hard
 
@@ -7971,7 +8000,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -8136,7 +8165,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native@npm:0.83.1":
+"react-native@npm:0.83.1, react-native@npm:>=0.54.0":
   version: 0.83.1
   resolution: "react-native@npm:0.83.1"
   dependencies:
@@ -9747,5 +9776,26 @@ __metadata:
   version: 4.3.5
   resolution: "zod@npm:4.3.5"
   checksum: 10/3148bd52e56ab7c1641ec397e6be6eddbb1d8f5db71e95baab9bb9622a0ea49d8a385885fc1c22b90fa6d8c5234e051f4ef5d469cfe3fb90198d5a91402fd89c
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.9":
+  version: 5.0.9
+  resolution: "zustand@npm:5.0.9"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10/af24d8cc07383b85bf713d1be55a788d4559c5b20980852095c2352bfd0a3bc64d0ba1f08f2f440d5c298ea2856d34d67e5e74fafe29d8796e8b4a09781ca86c
   languageName: node
   linkType: hard
